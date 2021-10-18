@@ -93,7 +93,7 @@ namespace XIVComboExpandedPlugin
                     return this.OriginalHook(actionID);
 
                 var lastComboMove = *(uint*)Service.Address.LastComboMove;
-                var comboTime = *(float*)Service.Address.ComboTimer;
+                var comboTime = *(float*)Service.Address.ComboTimer - 0.2F;
                 var level = localPlayer.Level;
 
                 foreach (var combo in this.customCombos)
