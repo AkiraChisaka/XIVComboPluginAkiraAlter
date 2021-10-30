@@ -149,8 +149,8 @@ namespace XIVComboExpandedPlugin.Combos
                 if (level >= RDM.Levels.Scorch && (lastComboMove == RDM.Verflare || lastComboMove == RDM.Verholy))
                     return RDM.Scorch;
 
-                if (lastComboMove == RDM.EnchantedRedoublement && level >= RDM.Levels.Verholy)
-                    return RDM.Verholy;
+                //if (lastComboMove == RDM.EnchantedRedoublement && level >= RDM.Levels.Verholy)
+                //    return RDM.Verholy;
 
                 if (IsEnabled(CustomComboPreset.RedMageVerprocComboPlus))
                 {
@@ -175,8 +175,8 @@ namespace XIVComboExpandedPlugin.Combos
                 if (level >= RDM.Levels.Scorch && (lastComboMove == RDM.Verflare || lastComboMove == RDM.Verholy))
                     return RDM.Scorch;
 
-                if (lastComboMove == RDM.EnchantedRedoublement && level >= RDM.Levels.Verflare)
-                    return RDM.Verflare;
+                //if (lastComboMove == RDM.EnchantedRedoublement && level >= RDM.Levels.Verflare)
+                //    return RDM.Verflare;
 
                 if (IsEnabled(CustomComboPreset.RedMageVerprocComboPlus))
                 {
