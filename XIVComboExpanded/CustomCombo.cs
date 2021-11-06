@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.ClientState.JobGauge.Types;
@@ -6,6 +8,7 @@ using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Game.ClientState.Statuses;
 using Dalamud.Utility;
+using XIVComboExpandedPlugin.Attributes;
 
 namespace XIVComboExpandedPlugin.Combos
 {
@@ -94,6 +97,32 @@ namespace XIVComboExpandedPlugin.Combos
         }
 
         /// <summary>
+        /// Calculate the best action to use, based on cooldown remaining.
+        /// </summary>
+        /// <param name="actions">Action data.</param>
+        /// <returns>The appropriate action to use.</returns>
+        protected static (uint ActionID, IconReplacer.CooldownData Data) CalcBestAction(params (uint ActionID, IconReplacer.CooldownData Data)[] actions)
+        {
+            static (uint ActionID, IconReplacer.CooldownData Data) Compare(
+                (uint ActionID, IconReplacer.CooldownData Data) a1,
+                (uint ActionID, IconReplacer.CooldownData Data) a2)
+            {
+                // Neither, return the first parameter
+                if (!a1.Data.IsCooldown && !a2.Data.IsCooldown)
+                    return a1;
+
+                // Both, return soonest available
+                if (a1.Data.IsCooldown && a2.Data.IsCooldown)
+                    return a1.Data.CooldownRemaining < a2.Data.CooldownRemaining ? a1 : a2;
+
+                // One or the other
+                return a1.Data.IsCooldown ? a2 : a1;
+            }
+
+            return actions.Aggregate((a1, a2) => Compare(a1, a2));
+        }
+
+        /// <summary>
         /// Invokes the combo.
         /// </summary>
         /// <param name="actionID">Starting action ID.</param>
@@ -109,6 +138,8 @@ namespace XIVComboExpandedPlugin.Combos
     /// </summary>
     internal abstract partial class CustomCombo
     {
+        private static readonly Dictionary<Type, JobGaugeBase> JobGaugeCache = new();
+
         /// <summary>
         /// Gets the player or null.
         /// </summary>
@@ -240,6 +271,12 @@ namespace XIVComboExpandedPlugin.Combos
         /// </summary>
         /// <typeparam name="T">Type of job gauge.</typeparam>
         /// <returns>The job gauge.</returns>
-        protected static T GetJobGauge<T>() where T : JobGaugeBase => Service.JobGauges.Get<T>();
+        protected static T GetJobGauge<T>() where T : JobGaugeBase
+        {
+            if (!JobGaugeCache.TryGetValue(typeof(T), out var gauge))
+                gauge = JobGaugeCache[typeof(T)] = Service.JobGauges.Get<T>();
+
+            return (T)gauge;
+        }
     }
 }
