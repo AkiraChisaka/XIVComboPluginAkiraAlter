@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -30,16 +30,14 @@ namespace XIVComboExpandedPlugin
 
             this.groupedPresets = Enum
                 .GetValues<CustomComboPreset>()
-                .Select(preset => (
-                    PresetInfo: (preset, Info: preset.GetAttribute<CustomComboInfoAttribute>()),
-                    Ordering: preset.GetAttribute<OrderedEnumAttribute>()))
-                .Where(tpl => tpl.PresetInfo.Info != null && tpl.Ordering != null)
-                .OrderBy(tpl => tpl.PresetInfo.Info.JobName)
-                .ThenBy(tpl => tpl.Ordering.Order)
-                .GroupBy(tpl => tpl.PresetInfo.Info.JobName)
+                .Select(preset => (Preset: preset, Info: preset.GetAttribute<CustomComboInfoAttribute>()))
+                .Where(tpl => tpl.Info != null)
+                .OrderBy(tpl => tpl.Info.JobName)
+                .ThenBy(tpl => tpl.Info.Order)
+                .GroupBy(tpl => tpl.Info.JobName)
                 .ToDictionary(
                     tpl => tpl.Key,
-                    tpl => tpl.Select(tpl => tpl.PresetInfo).ToList());
+                    tpl => tpl.ToList());
 
             this.SizeCondition = ImGuiCond.FirstUseEver;
             this.Size = new Vector2(740, 490);
@@ -79,6 +77,12 @@ namespace XIVComboExpandedPlugin
                         var enabled = Service.Configuration.IsEnabled(preset);
                         var secret = Service.Configuration.IsSecret(preset);
                         var conflicts = Service.Configuration.GetConflicts(preset);
+                        var parent = Service.Configuration.GetParent(preset);
+
+#if !DEBUG
+                        if (preset == CustomComboPreset.Disabled)
+                            continue;
+#endif
 
                         if (secret && !showSecrets)
                             continue;
@@ -125,7 +129,14 @@ namespace XIVComboExpandedPlugin
 
                         ImGui.PopItemWidth();
 
-                        ImGui.TextColored(this.shadedColor, $"#{i}: {info.Description}");
+                        var description = $"#{i}: {info.Description}";
+                        if (parent != null)
+                        {
+                            var parentInfo = preset.GetAttribute<CustomComboInfoAttribute>();
+                            description += $"\nRequires {parentInfo.FancyName}";
+                        }
+
+                        ImGui.TextColored(this.shadedColor, description);
                         ImGui.Spacing();
 
                         if (conflicts.Length > 0)

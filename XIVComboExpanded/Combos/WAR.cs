@@ -20,13 +20,15 @@ namespace XIVComboExpandedPlugin.Combos
             MythrilTempest = 16462,
             ChaoticCyclone = 16463,
             NascentFlash = 16464,
-            InnerChaos = 16465;
+            InnerChaos = 16465,
+            PrimalRend = 25753;
 
         public static class Buffs
         {
             public const ushort
                 InnerRelease = 1177,
-                NascentChaos = 1897;
+                NascentChaos = 1897,
+                PrimalRendReady = 2624;
         }
 
         public static class Debuffs
@@ -46,28 +48,28 @@ namespace XIVComboExpandedPlugin.Combos
                 Decimate = 60,
                 MythrilTempestTrait = 74,
                 NascentFlash = 76,
-                InnerChaos = 80;
+                InnerChaos = 80,
+                PrimalRend = 90;
         }
     }
 
     internal class WarriorStormsPathCombo : CustomCombo
     {
-        protected override CustomComboPreset Preset => CustomComboPreset.WarriorStormsPathCombo;
+        protected internal override CustomComboPreset Preset { get; } = CustomComboPreset.WarriorStormsPathCombo;
+
+        protected internal override uint[] ActionIDs { get; } = new[] { WAR.StormsPath };
 
         protected override uint Invoke(uint actionID, uint lastComboMove, float comboTime, byte level)
         {
             if (actionID == WAR.StormsPath)
             {
-                // if (IsEnabled(CustomComboPreset.WarriorInnerReleaseFeature) && HasEffect(WAR.Buffs.InnerRelease))
-                //     return OriginalHook(WAR.FellCleave);
-
                 if (comboTime > 0)
                 {
-                    if (lastComboMove == WAR.HeavySwing && level >= WAR.Levels.Maim)
-                        return WAR.Maim;
-
                     if (lastComboMove == WAR.Maim && level >= WAR.Levels.StormsPath)
                         return WAR.StormsPath;
+
+                    if (lastComboMove == WAR.HeavySwing && level >= WAR.Levels.Maim)
+                        return WAR.Maim;
                 }
 
                 return WAR.HeavySwing;
@@ -79,22 +81,21 @@ namespace XIVComboExpandedPlugin.Combos
 
     internal class WarriorStormsEyeCombo : CustomCombo
     {
-        protected override CustomComboPreset Preset => CustomComboPreset.WarriorStormsEyeCombo;
+        protected internal override CustomComboPreset Preset { get; } = CustomComboPreset.WarriorStormsEyeCombo;
+
+        protected internal override uint[] ActionIDs { get; } = new[] { WAR.StormsEye };
 
         protected override uint Invoke(uint actionID, uint lastComboMove, float comboTime, byte level)
         {
             if (actionID == WAR.StormsEye)
             {
-                // if (Configuration.IsEnabled(CustomComboPreset.WarriorInnerReleaseFeature) && HasEffect(WAR.Buffs.InnerRelease))
-                //     return OriginalHook(WAR.FellCleave);
-
                 if (comboTime > 0)
                 {
-                    if (lastComboMove == WAR.HeavySwing && level >= WAR.Levels.Maim)
-                        return WAR.Maim;
-
                     if (lastComboMove == WAR.Maim && level >= WAR.Levels.StormsEye)
                         return WAR.StormsEye;
+
+                    if (lastComboMove == WAR.HeavySwing && level >= WAR.Levels.Maim)
+                        return WAR.Maim;
                 }
 
                 return WAR.HeavySwing;
@@ -106,25 +107,18 @@ namespace XIVComboExpandedPlugin.Combos
 
     internal class WarriorMythrilTempestCombo : CustomCombo
     {
-        protected override CustomComboPreset Preset => CustomComboPreset.WarriorMythrilTempestCombo;
+        protected internal override CustomComboPreset Preset { get; } = CustomComboPreset.WarriorMythrilTempestCombo;
+
+        protected internal override uint[] ActionIDs { get; } = new[] { WAR.MythrilTempest };
 
         protected override uint Invoke(uint actionID, uint lastComboMove, float comboTime, byte level)
         {
             if (actionID == WAR.MythrilTempest)
             {
-                // if (IsEnabled(CustomComboPreset.WarriorInnerReleaseFeature) && HasEffect(WAR.Buffs.InnerRelease))
-                //     return OriginalHook(WAR.Decimate);
-
                 if (comboTime > 0)
                 {
                     if (lastComboMove == WAR.Overpower && level >= WAR.Levels.MythrilTempest)
-                    {
-                        // var gauge = GetJobGauge<WARGauge>().BeastGaugeAmount;
-                        // if (IsEnabled(CustomComboPreset.WarriorGaugeOvercapFeature) && gauge >= 90 && level >= WAR.Levels.MythrilTempestTrait)
-                        //     return OriginalHook(WAR.Decimate);
-
                         return WAR.MythrilTempest;
-                    }
                 }
 
                 return WAR.Overpower;
@@ -136,15 +130,40 @@ namespace XIVComboExpandedPlugin.Combos
 
     internal class WarriorNascentFlashFeature : CustomCombo
     {
-        protected override CustomComboPreset Preset => CustomComboPreset.WarriorNascentFlashFeature;
+        protected internal override CustomComboPreset Preset { get; } = CustomComboPreset.WarriorNascentFlashFeature;
+
+        protected internal override uint[] ActionIDs { get; } = new[] { WAR.NascentFlash };
 
         protected override uint Invoke(uint actionID, uint lastComboMove, float comboTime, byte level)
         {
             if (actionID == WAR.NascentFlash)
             {
                 if (level >= WAR.Levels.NascentFlash)
-                    return WAR.NascentFlash;
+                    // Bloodwhetting
+                    return OriginalHook(WAR.NascentFlash);
+
                 return WAR.RawIntuition;
+            }
+
+            return actionID;
+        }
+    }
+
+    internal class WArriorPrimalRendFeature : CustomCombo
+    {
+        protected internal override CustomComboPreset Preset { get; } = CustomComboPreset.WarriorPrimalRendFeature;
+
+        protected internal override uint[] ActionIDs { get; } = new[] { WAR.InnerBeast, WAR.SteelCyclone };
+
+        protected override uint Invoke(uint actionID, uint lastComboMove, float comboTime, byte level)
+        {
+            if (actionID == WAR.InnerBeast || actionID == WAR.SteelCyclone)
+            {
+                if (level >= WAR.Levels.PrimalRend && HasEffect(WAR.Buffs.PrimalRendReady))
+                    return WAR.PrimalRend;
+
+                // Fell Cleave or Decimate
+                return OriginalHook(actionID);
             }
 
             return actionID;

@@ -32,13 +32,16 @@ namespace XIVComboExpandedPlugin.Combos
             public const byte
                 Cure2 = 30,
                 AfflatusSolace = 52,
+                AfflatusMisery = 74,
                 AfflatusRapture = 76;
         }
     }
 
     internal class WhiteMageSolaceMiseryFeature : CustomCombo
     {
-        protected override CustomComboPreset Preset => CustomComboPreset.WhiteMageSolaceMiseryFeature;
+        protected internal override CustomComboPreset Preset { get; } = CustomComboPreset.WhiteMageSolaceMiseryFeature;
+
+        protected internal override uint[] ActionIDs { get; } = new[] { WHM.AfflatusSolace };
 
         protected override uint Invoke(uint actionID, uint lastComboMove, float comboTime, byte level)
         {
@@ -46,7 +49,7 @@ namespace XIVComboExpandedPlugin.Combos
             {
                 var gauge = GetJobGauge<WHMGauge>();
 
-                if (gauge.BloodLily == 3)
+                if (level >= WHM.Levels.AfflatusMisery && gauge.BloodLily == 3)
                     return WHM.AfflatusMisery;
             }
 
@@ -56,7 +59,9 @@ namespace XIVComboExpandedPlugin.Combos
 
     internal class WhiteMageRaptureMiseryFeature : CustomCombo
     {
-        protected override CustomComboPreset Preset => CustomComboPreset.WhiteMageRaptureMiseryFeature;
+        protected internal override CustomComboPreset Preset { get; } = CustomComboPreset.WhiteMageRaptureMiseryFeature;
+
+        protected internal override uint[] ActionIDs { get; } = new[] { WHM.AfflatusRapture };
 
         protected override uint Invoke(uint actionID, uint lastComboMove, float comboTime, byte level)
         {
@@ -64,7 +69,7 @@ namespace XIVComboExpandedPlugin.Combos
             {
                 var gauge = GetJobGauge<WHMGauge>();
 
-                if (gauge.BloodLily == 3)
+                if (level >= WHM.Levels.AfflatusMisery && gauge.BloodLily == 3)
                     return WHM.AfflatusMisery;
             }
 
@@ -74,7 +79,9 @@ namespace XIVComboExpandedPlugin.Combos
 
     internal class WhiteMageCureFeature : CustomCombo
     {
-        protected override CustomComboPreset Preset => CustomComboPreset.WhiteMageCureFeature;
+        protected internal override CustomComboPreset Preset { get; } = CustomComboPreset.WhiteMageCureFeature;
+
+        protected internal override uint[] ActionIDs { get; } = new[] { WHM.Cure2 };
 
         protected override uint Invoke(uint actionID, uint lastComboMove, float comboTime, byte level)
         {
@@ -90,13 +97,18 @@ namespace XIVComboExpandedPlugin.Combos
 
     internal class WhiteMageAfflatusFeature : CustomCombo
     {
-        protected override CustomComboPreset Preset => CustomComboPreset.WhiteMageAfflatusFeature;
+        protected internal override CustomComboPreset Preset { get; } = CustomComboPreset.WhiteMageAfflatusFeature;
+
+        protected internal override uint[] ActionIDs { get; } = new[] { WHM.Cure2, WHM.Medica };
 
         protected override uint Invoke(uint actionID, uint lastComboMove, float comboTime, byte level)
         {
             if (actionID == WHM.Cure2)
             {
                 var gauge = GetJobGauge<WHMGauge>();
+
+                if (IsEnabled(CustomComboPreset.WhiteMageSolaceMiseryFeature) && level >= WHM.Levels.AfflatusMisery && gauge.BloodLily == 3)
+                    return WHM.AfflatusMisery;
 
                 if (level >= WHM.Levels.AfflatusSolace && gauge.Lily > 0)
                     return WHM.AfflatusSolace;
@@ -107,6 +119,9 @@ namespace XIVComboExpandedPlugin.Combos
             if (actionID == WHM.Medica)
             {
                 var gauge = GetJobGauge<WHMGauge>();
+
+                if (IsEnabled(CustomComboPreset.WhiteMageRaptureMiseryFeature) && level >= WHM.Levels.AfflatusMisery && gauge.BloodLily == 3)
+                    return WHM.AfflatusMisery;
 
                 if (level >= WHM.Levels.AfflatusRapture && gauge.Lily > 0)
                     return WHM.AfflatusRapture;

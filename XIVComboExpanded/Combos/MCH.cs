@@ -32,7 +32,8 @@ namespace XIVComboExpandedPlugin.Combos
             HeatBlast = 7410,
             HotShot = 2872,
             Drill = 16498,
-            AirAnchor = 16500;
+            AirAnchor = 16500,
+            Chainsaw = 25788;
 
         public static class Buffs
         {
@@ -63,7 +64,8 @@ namespace XIVComboExpandedPlugin.Combos
                 HeatedCleanShot = 64,
                 ChargedActionMastery = 74,
                 AirAnchor = 76,
-                QueenOverdrive = 80;
+                QueenOverdrive = 80,
+                Chainsaw = 90;
         }
     }
 
@@ -86,7 +88,9 @@ namespace XIVComboExpandedPlugin.Combos
 
     internal class MachinistMainCombo : CustomCombo
     {
-        protected override CustomComboPreset Preset => CustomComboPreset.MachinistMainCombo;
+        protected internal override CustomComboPreset Preset { get; } = CustomComboPreset.MachinistMainCombo;
+
+        protected internal override uint[] ActionIDs { get; } = new[] { MCH.CleanShot, MCH.HeatedCleanShot };
 
         protected override uint Invoke(uint actionID, uint lastComboMove, float comboTime, byte level)
         {
@@ -94,13 +98,16 @@ namespace XIVComboExpandedPlugin.Combos
             {
                 if (comboTime > 0)
                 {
-                    if (lastComboMove == MCH.SplitShot && level >= MCH.Levels.SlugShot)
-                        return OriginalHook(MCH.SlugShot);
-
                     if (lastComboMove == MCH.SlugShot && level >= MCH.Levels.CleanShot)
+                        // Heated
                         return OriginalHook(MCH.CleanShot);
+
+                    if (lastComboMove == MCH.SplitShot && level >= MCH.Levels.SlugShot)
+                        // Heated
+                        return OriginalHook(MCH.SlugShot);
                 }
 
+                // Heated
                 return OriginalHook(MCH.SplitShot);
             }
 
@@ -110,27 +117,16 @@ namespace XIVComboExpandedPlugin.Combos
 
     internal class MachinistGaussRoundRicochetFeature : CustomCombo
     {
-        protected override CustomComboPreset Preset => CustomComboPreset.MachinistGaussRoundRicochetFeature;
+        protected internal override CustomComboPreset Preset { get; } = CustomComboPreset.MachinistGaussRoundRicochetFeature;
+
+        protected internal override uint[] ActionIDs { get; } = new[] { MCH.GaussRound, MCH.Ricochet };
 
         protected override uint Invoke(uint actionID, uint lastComboMove, float comboTime, byte level)
         {
             if (actionID == MCH.GaussRound || actionID == MCH.Ricochet)
             {
                 if (level >= MCH.Levels.Ricochet)
-                {
-                    var gauss = (MCH.GaussRound, GetCooldown(MCH.GaussRound));
-                    var ricochet = (MCH.Ricochet, GetCooldown(MCH.Ricochet));
-
-                    // Prioritize whichever is slotted action.
-                    (actionID, _) = actionID switch
-                    {
-                        MCH.GaussRound => CalcBestAction(gauss, ricochet),
-                        MCH.Ricochet => CalcBestAction(ricochet, gauss),
-                        _ => throw new NotImplementedException(),
-                    };
-
-                    return actionID;
-                }
+                    return CalcBestAction(actionID, MCH.GaussRound, MCH.Ricochet);
 
                 return MCH.GaussRound;
             }
@@ -141,14 +137,17 @@ namespace XIVComboExpandedPlugin.Combos
 
     internal class MachinistOverheatFeature : CustomCombo
     {
-        protected override CustomComboPreset Preset => CustomComboPreset.MachinistOverheatFeature;
+        protected internal override CustomComboPreset Preset { get; } = CustomComboPreset.MachinistOverheatFeature;
+
+        protected internal override uint[] ActionIDs { get; } = new[] { MCH.HeatBlast, MCH.AutoCrossbow };
 
         protected override uint Invoke(uint actionID, uint lastComboMove, float comboTime, byte level)
         {
             if (actionID == MCH.HeatBlast || actionID == MCH.AutoCrossbow)
             {
                 var gauge = GetJobGauge<MCHGauge>();
-                if (!gauge.IsOverheated && level >= MCH.Levels.Hypercharge)
+
+                if (level >= MCH.Levels.Hypercharge && !gauge.IsOverheated)
                     return MCH.Hypercharge;
 
                 if (level < MCH.Levels.AutoCrossbow)
@@ -161,14 +160,17 @@ namespace XIVComboExpandedPlugin.Combos
 
     internal class MachinistSpreadShotFeature : CustomCombo
     {
-        protected override CustomComboPreset Preset => CustomComboPreset.MachinistSpreadShotFeature;
+        protected internal override CustomComboPreset Preset { get; } = CustomComboPreset.MachinistSpreadShotFeature;
+
+        protected internal override uint[] ActionIDs { get; } = new[] { MCH.SpreadShot };
 
         protected override uint Invoke(uint actionID, uint lastComboMove, float comboTime, byte level)
         {
             if (actionID == MCH.SpreadShot)
             {
                 var gauge = GetJobGauge<MCHGauge>();
-                if (gauge.IsOverheated && level >= MCH.Levels.AutoCrossbow)
+
+                if (level >= MCH.Levels.AutoCrossbow && gauge.IsOverheated)
                     return MCH.AutoCrossbow;
             }
 
@@ -178,16 +180,19 @@ namespace XIVComboExpandedPlugin.Combos
 
     internal class MachinistOverdriveFeature : CustomCombo
     {
-        protected override CustomComboPreset Preset => CustomComboPreset.MachinistOverdriveFeature;
+        protected internal override CustomComboPreset Preset { get; } = CustomComboPreset.MachinistOverdriveFeature;
+
+        protected internal override uint[] ActionIDs { get; } = new[] { MCH.RookAutoturret };
 
         protected override uint Invoke(uint actionID, uint lastComboMove, float comboTime, byte level)
         {
-            if (actionID == MCH.RookAutoturret || actionID == MCH.AutomatonQueen)
+            if (actionID == MCH.RookAutoturret)
             {
                 var gauge = GetJobGauge<MCHGauge>();
-                if (gauge.IsRobotActive)
-                    // Rook Autoturret
-                    return OriginalHook(MCH.QueenOverdrive);
+
+                if (level >= MCH.Levels.RookOverdrive && gauge.IsRobotActive)
+                    // Queen Overdrive
+                    return OriginalHook(MCH.RookOverdrive);
             }
 
             return actionID;
@@ -196,43 +201,22 @@ namespace XIVComboExpandedPlugin.Combos
 
     internal class MachinistDrillAirAnchorFeature : CustomCombo
     {
-        protected override CustomComboPreset Preset => CustomComboPreset.MachinistDrillAirAnchorFeature;
+        protected internal override CustomComboPreset Preset { get; } = CustomComboPreset.MachinistHotShotDrillChainsawFeature;
+
+        protected internal override uint[] ActionIDs { get; } = new[] { MCH.HotShot, MCH.AirAnchor, MCH.Drill, MCH.Chainsaw };
 
         protected override uint Invoke(uint actionID, uint lastComboMove, float comboTime, byte level)
         {
-            if (actionID == MCH.Drill || actionID == MCH.HotShot || actionID == MCH.AirAnchor)
+            if (actionID == MCH.HotShot || actionID == MCH.AirAnchor || actionID == MCH.Drill || actionID == MCH.Chainsaw)
             {
+                if (level >= MCH.Levels.Chainsaw)
+                    return CalcBestAction(actionID, MCH.Chainsaw, MCH.AirAnchor, MCH.Drill);
+
                 if (level >= MCH.Levels.AirAnchor)
-                {
-                    var drill = (MCH.Drill, GetCooldown(MCH.Drill));
-                    var anchor = (MCH.AirAnchor, GetCooldown(MCH.AirAnchor));
-
-                    // Prioritize whichever is slotted action.
-                    (actionID, _) = actionID switch
-                    {
-                        MCH.Drill => CalcBestAction(drill, anchor),
-                        MCH.AirAnchor => CalcBestAction(anchor, drill),
-                        _ => throw new NotImplementedException(),
-                    };
-
-                    return actionID;
-                }
+                    return CalcBestAction(actionID, MCH.AirAnchor, MCH.Drill);
 
                 if (level >= MCH.Levels.Drill)
-                {
-                    var drill = (MCH.Drill, GetCooldown(MCH.Drill));
-                    var hotshot = (MCH.HotShot, GetCooldown(MCH.HotShot));
-
-                    // Prioritize whichever is slotted action.
-                    (actionID, _) = actionID switch
-                    {
-                        MCH.Drill => CalcBestAction(drill, hotshot),
-                        MCH.HotShot => CalcBestAction(hotshot, drill),
-                        _ => throw new NotImplementedException(),
-                    };
-
-                    return actionID;
-                }
+                    return CalcBestAction(actionID, MCH.Drill, MCH.HotShot);
 
                 return MCH.HotShot;
             }

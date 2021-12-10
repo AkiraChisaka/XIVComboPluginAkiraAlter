@@ -18,13 +18,19 @@ namespace XIVComboExpandedPlugin
         /// <summary>
         /// Gets or sets the configuration version.
         /// </summary>
-        public int Version { get; set; } = 4;
+        public int Version { get; set; } = 5;
+
+        /// <summary>
+        /// Gets or sets the collection of enabled combos.
+        /// </summary>
+        [JsonProperty("EnabledActionsV5")]
+        public HashSet<CustomComboPreset> EnabledActions { get; set; } = new();
 
         /// <summary>
         /// Gets or sets the collection of enabled combos.
         /// </summary>
         [JsonProperty("EnabledActionsV4")]
-        public HashSet<CustomComboPreset> EnabledActions { get; set; } = new();
+        public HashSet<CustomComboPreset> EnabledActions4 { get; set; } = new();
 
         /// <summary>
         /// Gets or sets a value indicating whether to allow and display secret combos.
@@ -72,5 +78,13 @@ namespace XIVComboExpandedPlugin
         /// <returns>The conflicting presets.</returns>
         public CustomComboPreset[] GetConflicts(CustomComboPreset preset)
             => preset.GetAttribute<ConflictingCombosAttribute>()?.ConflictingPresets ?? Array.Empty<CustomComboPreset>();
+
+        /// <summary>
+        /// Gets the parent combo preset if it exists, or null.
+        /// </summary>
+        /// <param name="preset">Preset to check.</param>
+        /// <returns>The parent preset.</returns>
+        public CustomComboPreset? GetParent(CustomComboPreset preset)
+            => preset.GetAttribute<ParentComboAttribute>()?.ParentPreset;
     }
 }

@@ -18,13 +18,14 @@ namespace XIVComboExpandedPlugin.Combos
             Ewer = 4405,
             Spire = 4406,
             MinorArcana = 7443,
-            SleeveDraw = 7448,
-            Play = 17055;
+            Play = 17055,
+            CrownPlay = 25869;
 
         public static class Buffs
         {
             public const ushort
-                Placeholder = 0;
+                LordOfCrownsDrawn = 2054,
+                LadyOfCrownsDrawn = 2055;
         }
 
         public static class Debuffs
@@ -37,21 +38,24 @@ namespace XIVComboExpandedPlugin.Combos
         {
             public const byte
                 Benefic2 = 26,
-                MinorArcana = 50,
-                SleeveDraw = 70;
+                Draw = 30,
+                MinorArcana = 70,
+                CrownPlay = 70;
         }
     }
 
     internal class AstrologianCardsOnDrawFeature : CustomCombo
     {
-        protected override CustomComboPreset Preset => CustomComboPreset.AstrologianCardsOnDrawFeature;
+        protected internal override CustomComboPreset Preset { get; } = CustomComboPreset.AstrologianCardsOnDrawFeature;
+
+        protected internal override uint[] ActionIDs { get; } = new[] { AST.Play };
 
         protected override uint Invoke(uint actionID, uint lastComboMove, float comboTime, byte level)
         {
             if (actionID == AST.Play)
             {
                 var gauge = GetJobGauge<ASTGauge>();
-                if (gauge.DrawnCard == CardType.NONE)
+                if (level >= AST.Levels.Draw && gauge.DrawnCard == CardType.NONE)
                     return AST.Draw;
             }
 
@@ -59,26 +63,30 @@ namespace XIVComboExpandedPlugin.Combos
         }
     }
 
-    // internal class AstrologianSleeveDrawFeature : CustomCombo
-    // {
-    //     protected override CustomComboPreset Preset => CustomComboPreset.AstrologianSleeveDrawFeature;
-    //
-    //     protected override uint Invoke(uint actionID, uint lastComboMove, float comboTime, byte level)
-    //     {
-    //         if (actionID == AST.MinorArcana)
-    //         {
-    //             var gauge = GetJobGauge<ASTGauge>();
-    //             if (gauge.DrawnCard() == CardType.NONE && level >= AST.Levels.SleeveDraw)
-    //                 return AST.SleeveDraw;
-    //         }
-    //
-    //         return actionID;
-    //     }
-    // }
+    internal class AstrologianMinorArcanaPlayFeature : CustomCombo
+    {
+        protected internal override CustomComboPreset Preset { get; } = CustomComboPreset.AstrologianMinorArcanaPlayFeature;
+
+        protected internal override uint[] ActionIDs { get; } = new[] { AST.MinorArcana };
+
+        protected override uint Invoke(uint actionID, uint lastComboMove, float comboTime, byte level)
+        {
+            if (actionID == AST.MinorArcana)
+            {
+                var gauge = GetJobGauge<ASTGauge>();
+                if (level >= AST.Levels.CrownPlay && gauge.DrawnCrownCard != CardType.NONE)
+                    return OriginalHook(AST.CrownPlay);
+            }
+
+            return actionID;
+        }
+    }
 
     internal class AstrologianBeneficFeature : CustomCombo
     {
-        protected override CustomComboPreset Preset => CustomComboPreset.AstrologianBeneficFeature;
+        protected internal override CustomComboPreset Preset { get; } = CustomComboPreset.AstrologianBeneficFeature;
+
+        protected internal override uint[] ActionIDs { get; } = new[] { AST.Benefic2 };
 
         protected override uint Invoke(uint actionID, uint lastComboMove, float comboTime, byte level)
         {

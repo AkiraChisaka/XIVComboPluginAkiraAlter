@@ -8,18 +8,22 @@ namespace XIVComboExpandedPlugin.Combos
         public const uint
             FastBlade = 9,
             RiotBlade = 15,
-            ShieldBash = 16,
             RageOfHalone = 21,
+            CircleOfScorn = 23,
+            SpiritsWithin = 29,
             GoringBlade = 3538,
             RoyalAuthority = 3539,
-            LowBlow = 7540,
             TotalEclipse = 7381,
             Requiescat = 7383,
             HolySpirit = 7384,
             Prominence = 16457,
             HolyCircle = 16458,
             Confiteor = 16459,
-            Atonement = 16460;
+            Atonement = 16460,
+            Expiacion = 25747,
+            BladeOfFaith = 25748,
+            BladeOfTruth = 25749,
+            BladeOfValor = 25750;
 
         public static class Buffs
         {
@@ -38,43 +42,39 @@ namespace XIVComboExpandedPlugin.Combos
         {
             public const byte
                 RiotBlade = 4,
+                SpiritsWithin = 30,
+                CircleOfScorn = 50,
                 RageOfHalone = 26,
                 Prominence = 40,
                 GoringBlade = 54,
                 RoyalAuthority = 60,
                 HolyCircle = 72,
                 Atonement = 76,
-                Confiteor = 80;
+                Confiteor = 80,
+                Expiacion = 86,
+                BladeOfFaith = 90,
+                BladeOfTruth = 90,
+                BladeOfValor = 90;
         }
     }
 
     internal class PaladinGoringBladeCombo : CustomCombo
     {
-        protected override CustomComboPreset Preset => CustomComboPreset.PaladinGoringBladeCombo;
+        protected internal override CustomComboPreset Preset { get; } = CustomComboPreset.PaladinGoringBladeCombo;
+
+        protected internal override uint[] ActionIDs { get; } = new[] { PLD.GoringBlade };
 
         protected override uint Invoke(uint actionID, uint lastComboMove, float comboTime, byte level)
         {
             if (actionID == PLD.GoringBlade)
             {
-                // if (IsEnabled(CustomComboPreset.PaladinRequiescatFeature))
-                // {
-                //     //Replace with Holy Spirit when Requiescat is up
-                //     if (HasEffect(PLD.Buffs.Requiescat))
-                //     {
-                //         if (IsEnabled(CustomComboPreset.PaladinConfiteorFeature) && level >= PLD.Levels.Confiteor && LocalPlayer.CurrentMp < 4000)
-                //             return PLD.Confiteor;
-                //
-                //         return PLD.HolySpirit;
-                //     }
-                // }
-
                 if (comboTime > 0)
                 {
-                    if (lastComboMove == PLD.FastBlade && level >= PLD.Levels.RiotBlade)
-                        return PLD.RiotBlade;
-
                     if (lastComboMove == PLD.RiotBlade && level >= PLD.Levels.GoringBlade)
                         return PLD.GoringBlade;
+
+                    if (lastComboMove == PLD.FastBlade && level >= PLD.Levels.RiotBlade)
+                        return PLD.RiotBlade;
                 }
 
                 return PLD.FastBlade;
@@ -84,39 +84,29 @@ namespace XIVComboExpandedPlugin.Combos
         }
     }
 
-    internal class PaladinRoyalAuthorityCombo : CustomCombo
+    internal class PaladinRageOfHaloneCombo : CustomCombo
     {
-        protected override CustomComboPreset Preset => CustomComboPreset.PaladinRoyalAuthorityCombo;
+        protected internal override CustomComboPreset Preset { get; } = CustomComboPreset.PaladinRageOfHaloneCombo;
+
+        protected internal override uint[] ActionIDs { get; } = new[] { PLD.RageOfHalone, PLD.RoyalAuthority };
 
         protected override uint Invoke(uint actionID, uint lastComboMove, float comboTime, byte level)
         {
-            if (actionID == PLD.RoyalAuthority || actionID == PLD.RageOfHalone)
+            if (actionID == PLD.RageOfHalone || actionID == PLD.RoyalAuthority)
             {
-                // if (IsEnabled(CustomComboPreset.PaladinRequiescatFeature))
-                // {
-                //     //Replace with Holy Spirit when Requiescat is up
-                //     if (HasEffect(PLD.Buffs.Requiescat))
-                //     {
-                //         //Replace with Confiteor when under 4000 MP
-                //         if (IsEnabled(CustomComboPreset.PaladinConfiteorFeature) && level >= PLD.Levels.Confiteor && LocalPlayer.CurrentMp < 4000)
-                //             return PLD.Confiteor;
-                //         return PLD.HolySpirit;
-                //     }
-                // }
+                if (IsEnabled(CustomComboPreset.PaladinAtonementFeature))
+                {
+                    if (level >= PLD.Levels.Atonement && HasEffect(PLD.Buffs.SwordOath))
+                        return PLD.Atonement;
+                }
 
                 if (comboTime > 0)
                 {
-                    if (lastComboMove == PLD.FastBlade && level >= PLD.Levels.RiotBlade)
-                        return PLD.RiotBlade;
-
                     if (lastComboMove == PLD.RiotBlade && level >= PLD.Levels.RageOfHalone)
                         return OriginalHook(PLD.RageOfHalone);
-                }
 
-                if (IsEnabled(CustomComboPreset.PaladinAtonementFeature))
-                {
-                    if (HasEffect(PLD.Buffs.SwordOath))
-                        return PLD.Atonement;
+                    if (lastComboMove == PLD.FastBlade && level >= PLD.Levels.RiotBlade)
+                        return PLD.RiotBlade;
                 }
 
                 return PLD.FastBlade;
@@ -128,23 +118,14 @@ namespace XIVComboExpandedPlugin.Combos
 
     internal class PaladinProminenceCombo : CustomCombo
     {
-        protected override CustomComboPreset Preset => CustomComboPreset.PaladinProminenceCombo;
+        protected internal override CustomComboPreset Preset { get; } = CustomComboPreset.PaladinProminenceCombo;
+
+        protected internal override uint[] ActionIDs { get; } = new[] { PLD.Prominence };
 
         protected override uint Invoke(uint actionID, uint lastComboMove, float comboTime, byte level)
         {
             if (actionID == PLD.Prominence)
             {
-                // if (IsEnabled(CustomComboPreset.PaladinRequiescatFeature))
-                // {
-                //     if (HasEffect(PLD.Buffs.Requiescat) && level >= PLD.Levels.HolyCircle)
-                //     {
-                //         if (IsEnabled(CustomComboPreset.PaladinConfiteorFeature) && level >= PLD.Levels.Confiteor && LocalPlayer.CurrentMp < 4000)
-                //             return PLD.Confiteor;
-                //
-                //         return PLD.HolyCircle;
-                //     }
-                // }
-
                 if (comboTime > 0)
                 {
                     if (lastComboMove == PLD.TotalEclipse && level >= PLD.Levels.Prominence)
@@ -160,24 +141,29 @@ namespace XIVComboExpandedPlugin.Combos
 
     internal class PaladinConfiteorFeature : CustomCombo
     {
-        protected override CustomComboPreset Preset => CustomComboPreset.PaladinConfiteorFeature;
+        protected internal override CustomComboPreset Preset { get; } = CustomComboPreset.PaladinConfiteorFeature;
+
+        protected internal override uint[] ActionIDs { get; } = new[] { PLD.HolySpirit, PLD.HolyCircle };
 
         protected override uint Invoke(uint actionID, uint lastComboMove, float comboTime, byte level)
         {
-            if (actionID == PLD.HolySpirit)
+            if (actionID == PLD.HolySpirit || actionID == PLD.HolyCircle)
             {
-                if (HasEffect(PLD.Buffs.Requiescat) && level >= PLD.Levels.Confiteor && LocalPlayer?.CurrentMp < 4000)
-                    return PLD.Confiteor;
+                if (lastComboMove == PLD.BladeOfTruth && level >= PLD.Levels.BladeOfValor)
+                    return PLD.BladeOfValor;
 
-                return PLD.HolySpirit;
-            }
+                if (lastComboMove == PLD.BladeOfFaith && level >= PLD.Levels.BladeOfTruth)
+                    return PLD.BladeOfTruth;
 
-            if (actionID == PLD.HolyCircle)
-            {
-                if (HasEffect(PLD.Buffs.Requiescat) && level >= PLD.Levels.Confiteor && LocalPlayer?.CurrentMp < 4000)
-                    return PLD.Confiteor;
+                if (lastComboMove == PLD.Confiteor && level >= PLD.Levels.BladeOfFaith)
+                    return PLD.BladeOfFaith;
 
-                return PLD.HolyCircle;
+                if (level >= PLD.Levels.Confiteor)
+                {
+                    var requiescat = FindEffect(PLD.Buffs.Requiescat);
+                    if (requiescat != null && (requiescat.StackCount == 1 || LocalPlayer?.CurrentMp < 2000))
+                        return PLD.Confiteor;
+                }
             }
 
             return actionID;
@@ -186,16 +172,52 @@ namespace XIVComboExpandedPlugin.Combos
 
     internal class PaladinRequiescatCombo : CustomCombo
     {
-        protected override CustomComboPreset Preset => CustomComboPreset.PaladinRequiescatCombo;
+        protected internal override CustomComboPreset Preset { get; } = CustomComboPreset.PaladinRequiescatCombo;
+
+        protected internal override uint[] ActionIDs { get; } = new[] { PLD.Requiescat };
 
         protected override uint Invoke(uint actionID, uint lastComboMove, float comboTime, byte level)
         {
             if (actionID == PLD.Requiescat)
             {
-                if (HasEffect(PLD.Buffs.Requiescat) && level >= PLD.Levels.Confiteor)
-                    return PLD.Confiteor;
+                if (lastComboMove == PLD.BladeOfTruth && level >= PLD.Levels.BladeOfValor)
+                    return PLD.BladeOfValor;
 
-                return PLD.Requiescat;
+                if (lastComboMove == PLD.BladeOfFaith && level >= PLD.Levels.BladeOfTruth)
+                    return PLD.BladeOfTruth;
+
+                if (lastComboMove == PLD.Confiteor && level >= PLD.Levels.BladeOfFaith)
+                    return PLD.BladeOfFaith;
+
+                if (level >= PLD.Levels.Confiteor)
+                {
+                    var requiescat = FindEffect(PLD.Buffs.Requiescat);
+                    if (requiescat != null && (requiescat.StackCount == 1 || LocalPlayer?.CurrentMp < 2000))
+                        return PLD.Confiteor;
+                }
+            }
+
+            return actionID;
+        }
+    }
+
+    internal class PaladinScornfulSpiritsFeature : CustomCombo
+    {
+        protected internal override CustomComboPreset Preset { get; } = CustomComboPreset.PaladinScornfulSpiritsFeature;
+
+        protected internal override uint[] ActionIDs { get; } = new[] { PLD.SpiritsWithin, PLD.CircleOfScorn };
+
+        protected override uint Invoke(uint actionID, uint lastComboMove, float comboTime, byte level)
+        {
+            if (actionID == PLD.SpiritsWithin || actionID == PLD.CircleOfScorn)
+            {
+                if (level >= PLD.Levels.Expiacion)
+                    return CalcBestAction(actionID, PLD.Expiacion, PLD.CircleOfScorn);
+
+                if (level >= PLD.Levels.CircleOfScorn)
+                    return CalcBestAction(actionID, PLD.SpiritsWithin, PLD.CircleOfScorn);
+
+                return PLD.SpiritsWithin;
             }
 
             return actionID;

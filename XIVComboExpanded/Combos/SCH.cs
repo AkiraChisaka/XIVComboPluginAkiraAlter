@@ -28,20 +28,24 @@ namespace XIVComboExpandedPlugin.Combos
         public static class Levels
         {
             public const byte
-                Placeholder = 0;
+                Aetherflow = 45,
+                Consolation = 80;
         }
     }
 
     internal class ScholarSeraphConsolationFeature : CustomCombo
     {
-        protected override CustomComboPreset Preset => CustomComboPreset.ScholarSeraphConsolationFeature;
+        protected internal override CustomComboPreset Preset { get; } = CustomComboPreset.ScholarSeraphConsolationFeature;
+
+        protected internal override uint[] ActionIDs { get; } = new[] { SCH.FeyBless };
 
         protected override uint Invoke(uint actionID, uint lastComboMove, float comboTime, byte level)
         {
             if (actionID == SCH.FeyBless)
             {
                 var gauge = GetJobGauge<SCHGauge>();
-                if (gauge.SeraphTimer > 0)
+
+                if (level >= SCH.Levels.Consolation && gauge.SeraphTimer > 0)
                     return SCH.Consolation;
             }
 
@@ -51,14 +55,17 @@ namespace XIVComboExpandedPlugin.Combos
 
     internal class ScholarEnergyDrainFeature : CustomCombo
     {
-        protected override CustomComboPreset Preset => CustomComboPreset.ScholarEnergyDrainFeature;
+        protected internal override CustomComboPreset Preset { get; } = CustomComboPreset.ScholarEnergyDrainFeature;
+
+        protected internal override uint[] ActionIDs { get; } = new[] { SCH.EnergyDrain };
 
         protected override uint Invoke(uint actionID, uint lastComboMove, float comboTime, byte level)
         {
             if (actionID == SCH.EnergyDrain)
             {
                 var gauge = GetJobGauge<SCHGauge>();
-                if (gauge.Aetherflow == 0)
+
+                if (level >= SCH.Levels.Aetherflow && gauge.Aetherflow == 0)
                     return SCH.Aetherflow;
             }
 
