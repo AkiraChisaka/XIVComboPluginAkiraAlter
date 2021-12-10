@@ -187,8 +187,8 @@ namespace XIVComboExpandedPlugin
         [CustomComboInfo("(Heated) Shot Combo", "Replace Clean Shot with its combo chain.", MCH.JobID)]
         MachinistMainCombo = 3101,
 
-        [CustomComboInfo("Heat Blast On Combo", "Replace Shot Combo with Heat Blast when overheated, require (Heated) Shot Combo.", MCH.JobID, MCH.CleanShot, MCH.HeatedCleanShot)]
-        MachinistHeatBlastFeature = 301,
+        [CustomComboInfo("Heat Blast On Combo", "Replace Shot Combo with Heat Blast when overheated, require (Heated) Shot Combo.", MCH.JobID)]
+        MachinistHeatBlastFeature = 3199,
 
         [CustomComboInfo("Spread Shot Heat", "Replace Spread Shot with Auto Crossbow when overheated.", MCH.JobID)]
         MachinistSpreadShotFeature = 3102,
