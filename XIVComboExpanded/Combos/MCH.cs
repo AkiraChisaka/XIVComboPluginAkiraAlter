@@ -71,7 +71,9 @@ namespace XIVComboExpandedPlugin.Combos
 
     internal class MachinistHeatBlastFeature : CustomCombo
     {
-        protected override CustomComboPreset Preset => CustomComboPreset.MachinistHeatBlastFeature;
+        protected internal override CustomComboPreset Preset { get; } = CustomComboPreset.MachinistHeatBlastFeature;
+
+        protected internal override uint[] ActionIDs { get; } = new[] { MCH.CleanShot, MCH.HeatedCleanShot, MCH.HeatBlast };
 
         protected override uint Invoke(uint actionID, uint lastComboMove, float comboTime, byte level)
         {

@@ -100,8 +100,8 @@ namespace XIVComboExpandedPlugin.Combos
             {
                 var gauge = GetJobGauge<MNKGauge>();
 
-                if (level >= MNK.Levels.Meditation && gauge.Chakra < 5)
-                    return MNK.Meditation;
+                //if (level >= MNK.Levels.Meditation && gauge.Chakra < 5)
+                //    return MNK.Meditation;
 
                 // Enlightenment
                 return OriginalHook(MNK.HowlingFist);
