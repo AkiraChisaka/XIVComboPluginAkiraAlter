@@ -91,13 +91,13 @@ namespace XIVComboExpandedPlugin.Combos
 
     internal class BardStraightShotUpgradeFeature : CustomCombo
     {
-        protected internal override CustomComboPreset Preset { get; } = CustomComboPreset.BardStraightShotUpgradeFeature;
+        protected internal override CustomComboPreset Preset { get; } = CustomComboPreset.BrdAny;
 
-        protected internal override uint[] ActionIDs { get; } = new[] { BRD.HeavyShot };
+        protected internal override uint[] ActionIDs { get; } = new[] { BRD.HeavyShot, BRD.BurstShot };
 
         protected override uint Invoke(uint actionID, uint lastComboMove, float comboTime, byte level)
         {
-            if (actionID == BRD.HeavyShot)
+            if (actionID == BRD.HeavyShot || actionID == BRD.BurstShot)
             {
                 if (IsEnabled(CustomComboPreset.BardApexFeature))
                 {
@@ -110,9 +110,12 @@ namespace XIVComboExpandedPlugin.Combos
                         return BRD.BlastArrow;
                 }
 
-                if (level >= BRD.Levels.StraightShot && HasEffect(BRD.Buffs.StraightShotReady))
-                    // Refulgent Arrow
-                    return OriginalHook(BRD.StraightShot);
+                if (IsEnabled(CustomComboPreset.BardStraightShotUpgradeFeature))
+                {
+                    if (level >= BRD.Levels.StraightShot && HasEffect(BRD.Buffs.StraightShotReady))
+                        // Refulgent Arrow
+                        return OriginalHook(BRD.StraightShot);
+                }
             }
 
             return actionID;
@@ -181,13 +184,13 @@ namespace XIVComboExpandedPlugin.Combos
 
     internal class BardShadowbiteFeature : CustomCombo
     {
-        protected internal override CustomComboPreset Preset { get; } = CustomComboPreset.BardShadowbiteFeature;
+        protected internal override CustomComboPreset Preset { get; } = CustomComboPreset.BrdAny;
 
-        protected internal override uint[] ActionIDs { get; } = new[] { BRD.QuickNock };
+        protected internal override uint[] ActionIDs { get; } = new[] { BRD.QuickNock, BRD.Ladonsbite };
 
         protected override uint Invoke(uint actionID, uint lastComboMove, float comboTime, byte level)
         {
-            if (actionID == BRD.QuickNock)
+            if (actionID == BRD.QuickNock || actionID == BRD.Ladonsbite)
             {
                 if (IsEnabled(CustomComboPreset.BardApexFeature))
                 {
@@ -200,8 +203,11 @@ namespace XIVComboExpandedPlugin.Combos
                         return BRD.BlastArrow;
                 }
 
-                if (level >= BRD.Levels.Shadowbite && HasEffect(BRD.Buffs.ShadowbiteReady))
-                    return BRD.Shadowbite;
+                if (IsEnabled(CustomComboPreset.BardShadowbiteFeature))
+                {
+                    if (level >= BRD.Levels.Shadowbite && HasEffect(BRD.Buffs.ShadowbiteReady))
+                        return BRD.Shadowbite;
+                }
             }
 
             return actionID;

@@ -30,6 +30,7 @@ namespace XIVComboExpandedPlugin
 
             this.groupedPresets = Enum
                 .GetValues<CustomComboPreset>()
+                .Where(preset => (int)preset > 100 && preset != CustomComboPreset.Disabled)
                 .Select(preset => (Preset: preset, Info: preset.GetAttribute<CustomComboInfoAttribute>()))
                 .Where(tpl => tpl.Info != null)
                 .OrderBy(tpl => tpl.Info.JobName)
@@ -79,11 +80,6 @@ namespace XIVComboExpandedPlugin
                         var conflicts = Service.Configuration.GetConflicts(preset);
                         var parent = Service.Configuration.GetParent(preset);
 
-#if !DEBUG
-                        if (preset == CustomComboPreset.Disabled)
-                            continue;
-#endif
-
                         if (secret && !showSecrets)
                             continue;
 
@@ -104,7 +100,6 @@ namespace XIVComboExpandedPlugin
                                 Service.Configuration.EnabledActions.Remove(preset);
                             }
 
-                            Service.IconReplacer.UpdateEnabledActionIDs();
                             Service.Configuration.Save();
                         }
 
@@ -136,7 +131,9 @@ namespace XIVComboExpandedPlugin
                             description += $"\nRequires {parentInfo.FancyName}";
                         }
 
-                        ImGui.TextColored(this.shadedColor, description);
+                        ImGui.PushStyleColor(ImGuiCol.Text, this.shadedColor);
+                        ImGui.TextWrapped(description);
+                        ImGui.PopStyleColor();
                         ImGui.Spacing();
 
                         if (conflicts.Length > 0)
@@ -164,7 +161,6 @@ namespace XIVComboExpandedPlugin
                             if (inputChanged)
                             {
                                 Service.Configuration.DancerDanceCompatActionIDs = actions.Cast<uint>().ToArray();
-                                Service.IconReplacer.UpdateEnabledActionIDs();
                                 Service.Configuration.Save();
                             }
 
